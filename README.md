@@ -1,2 +1,6 @@
 # Job-Shop_Scheduling
-a two stage hierarchical RL method framework of variant of the job dhop dcheduling problem
+a two-stage hierarchical RL method framework of a variant of the job shop scheduling problem
+
+an adaptive time window schedule and a rule schedule
+
+
