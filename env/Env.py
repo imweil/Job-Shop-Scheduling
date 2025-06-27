@@ -38,10 +38,6 @@ class Env:
 
         self.time_window = env_config["time_window"]
     def generate_job(self, job_list):
-        """
-        生成工件
-        job-list = [1,2,3,4,5,5],表示各个种类中工件的数量
-        """
         job_category = -1
 
         job_id = 0
@@ -75,7 +71,6 @@ class Env:
                 if i.id not in self.idle_job_list:
                     self.idle_job_list.append(i.id)
 
-        # 正序idle_list
         self.idle_job_list.sort()
 
         # update operation
@@ -96,7 +91,6 @@ class Env:
     """————————————————————————————————————————————————————————————————————————"""
 
     def generate_operation(self):
-        """导入生产阶段及机器"""
 
         for i in range(env_config["operation_num"]):
             operation = Operation(i)
