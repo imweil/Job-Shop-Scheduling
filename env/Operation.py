@@ -49,7 +49,6 @@ class Operation:
         return wait_time_list
 
     def sort_machine_wait_form_big_to_small(self):
-        """给空闲的机器的等待时间排序，重大到小"""
         wait_time_list = self.return_idle_wait_time()
 
         sorted_machine_id_list = utility.sort_two_list_from_big_to_small(self.idle_machine_list, wait_time_list)
@@ -68,7 +67,6 @@ class Operation:
         return state_list, time_list
 
 
-"""示例"""
 if __name__ == '__main__':
     a = Operation(1)
     a.generate_machine_random(2)
