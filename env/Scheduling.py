@@ -28,7 +28,6 @@ class Scheduling:
         suitable_job_id_list = matching.exist_job(operation, idle_job_list, job_list)
 
         match_list = []
-        # 是否有 机床 工件进行匹配
         if len(operation.idle_machine_list):
             if suitable_job_id_list:
                 match_list = self.select_matching_pattern(operation, suitable_job_id_list, job_list)
@@ -38,7 +37,7 @@ class Scheduling:
     """********************************************************************"""
 
     def select_matching_pattern(self, operation, suitable_job_id_list, job_list):
-        # self.matching_pattern = 4 # 改调度模式，可直接注释
+        # self.matching_pattern = 4 
 
         match_list = matching.pattern_match_list(operation, suitable_job_id_list, job_list, self.matching_pattern)
 
