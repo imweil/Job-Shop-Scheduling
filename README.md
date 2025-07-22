@@ -8,6 +8,7 @@ an adaptive time window schedule and a rule schedule
 
 run on PyTorch 2.4.1 and Python 3.9
 
+[📄 查看 PDF：舰载机弹药保障作业调度优化方法研究](https://raw.githubusercontent.com/imweil/Job-Shop-Scheduling/main/%E8%88%B0%E8%BD%BD%E6%9C%BA%E5%BC%B9%E8%8D%AF%E4%BF%9D%E9%9A%9C%E4%BD%9C%E4%B8%9A%E8%B0%83%E5%BA%A6%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95%E7%A0%94%E7%A9%B6.pdf)
 
 该方法基于分层强化学习范式，构建双层智能网络以优化弹药实时保障过程：上层智能体通过动态调整时间窗，根据系统当前状态自适应设置灵活窗口；下层智能体基于预定规则，自适应选择最优匹配策略，实现有限资源的合理分配。具体而言，上层智能体首先综合分析实时弹药保障态势和弹药保障机床运行状态，精准选择时间窗大小。通过将该时间窗内空闲弹药的决策信息传递至下层智能体，下层智能体将为空闲弹药选择最适合的启发式匹配规则，从而实现弹药保障的动态优化和资源高效利用。
 ![framework](framework.png "framework")
