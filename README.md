@@ -141,49 +141,67 @@ $$
    优先选择剩余工作量最大的任务进行调度。
 
 4. **最小开始时间优先（Minimum Start Time, MST）**  
-   优先选择可以最早开始的任务。
-\usepackage{listings}
-\usepackage{xcolor}
-\lstset{
-  basicstyle=\ttfamily\footnotesize,
-  breaklines=true,
-  frame=single,
-  backgroundcolor=\color{gray!5},
-  keywordstyle=\color{blue}\bfseries,
-  commentstyle=\color{green!50!black},
-  stringstyle=\color{orange},
-  showstringspaces=false,
-  numbers=left,
-  numberstyle=\tiny,
-  numbersep=5pt
-}
 
-\begin{lstlisting}[language=Python,caption={HRL-ADAS算法伪代码},label={lst:hrl-adas}]
-Input: Environment E, policy network π_θ, value function V_ϕ, 
-       learning rate α, clip ε, discount γ, epochs K, batch size B, 
-       timesteps per update T
-Output: Optimal scheduling scheme
+## 模型训练
 
-Initialize θ, ϕ
+### 奖励链接
 
-for each iteration i = 1, 2, ...
-    D = empty buffer
-    for each episode j = 1, ..., N
+本文对上下两层智能体构建了独特的奖励链接机制，其中下层奖励为上个决策步中的最长完成时间减去当前最长完整完成时间，即：
+
+$$
+r^l_i = \max_j(C_j)_{i-1} - \max_j(C_j)_i
+$$
+
+根据下层智能体选择各个调度规则的可能性对最长完成时间进行加权求和，作为上层智能体的奖励，计算方式如下：
+
+$$
+r^h_i = \sum p(a^l_j) \cdot \left[\max_j(C_j)_{i-1} - \max_j(C_j)_i \right]
+$$
+
+### 模型训练
+
+针对本文提出的分层强化学习框架（框架名称），本小节介绍该框架的训练方法。本文以 PPO 算法为例，阐述（框架名称）的训练过程。
+
+> 🚩 *注意：此处需体现上下层的联合交互训练，即突出“联合”训练的过程。*
+
+HRL-ADAS算法的伪代码如下所示：
+
+```python
+# HRL-ADAS算法伪代码
+
+# Input: 环境 E, 策略网络 π_θ, 价值网络 V_φ, 学习率 α,
+# 剪切参数 ε, 折扣因子 γ, 训练轮数 K, 批大小 B, 每次更新步数 T
+
+# Output: 最优调度方案
+
+Initialize policy network parameters θ, value function parameters φ
+
+for iteration i = 1, 2, ... do:
+    Initialize empty trajectory buffer D = ∅
+
+    for episode j = 1, 2, ..., N do:
         s₀ = E.reset()
-        for t = 0, ..., T
-            Sample a_t ∼ π_θ(a_t | s_t)
-            Execute a_t: (s_{t+1}, r_t) = E.step(a_t)
-            Store (s_t, a_t, r_t, s_{t+1}) in D
-            if done or max timesteps reached: break
+        for timestep t = 0, 1, ..., T do:
+            a_t ∼ π_θ(a_t | s_t)
+            s_{t+1}, r_t = E.step(a_t)
+            D ← D ∪ (s_t, a_t, r_t, s_{t+1})
+            if done or t == T:
+                break
 
-    Compute advantages Â_t and returns R_t
-    Normalize Â_t
+    Compute advantages Â_t and returns R_t for each (s, a, r, s') in D
+    Normalize advantages: Â_t ← (Â_t − μ) / σ
 
-    for epoch k = 1, ..., K
+    for epoch k = 1, 2, ..., K do:
         Shuffle D into mini-batches
-        for each mini-batch b in D
-            Compute PPO ratio and surrogate loss
-            Compute value loss: L^{VF}(θ) = E[(V_ϕ(s_t) - R_t)^2]
-            Update θ ← θ - α ∇_θ L(θ,ϕ)
-            Optionally update ϕ ← ϕ - α ∇_ϕ L^{VF}(ϕ)
-\end{lstlisting}
+        for each mini-batch b in D do:
+            Compute ratio:
+                r_t(θ) = π_θ(a_t|s_t) / π_θ_old(a_t|s_t)
+            Compute surrogate loss:
+                L^CLIP(θ) = E[min(r_t(θ)Â_t, clip(r_t(θ), 1−ε, 1+ε)Â_t)]
+            Compute value loss:
+                L^{VF}(φ) = E[(V_φ(s_t) − R_t)^2]
+            Update θ: θ ← θ − α ∇_θ L
+            Optionally update φ: φ ← φ − α ∇_φ L^{VF}
+```
+
+> 📝 公式中的 `π_θ` 是策略网络，`V_φ` 是价值网络，`Â_t` 是优势函数，`R_t` 是回报。
